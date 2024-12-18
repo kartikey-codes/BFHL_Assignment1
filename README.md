@@ -13,9 +13,8 @@
 ### Base URL:
 ```
 https://bfhl-assignment1.onrender.com
-
-🚧 Note: Since the backend is hosted on a free Render version, it may take up to 50 seconds to fire up and respond.
 ```
+🚧 Note: Since the backend is hosted on a free Render version, it may take up to 50 seconds to fire up and respond.
 
 ### API Documentation:
 - Swagger UI: [https://bfhl-assignment1.onrender.com](https://bfhl-assignment1.onrender.com)
