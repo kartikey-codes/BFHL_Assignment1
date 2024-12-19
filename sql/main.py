@@ -8,8 +8,8 @@ app = FastAPI()
 Base = declarative_base()
 metadata = MetaData()
 
-SQLALCHEMY_DATABASE_URL = "mssql+pyodbc://sa:sa@KARTIKEY-PC/bfhl_assignment1?driver=ODBC+Driver+17+for+SQL+Server"
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+conn_string = "mssql+pyodbc://sa:sa@KARTIKEY-PC/bfhl_assignment1?driver=ODBC+Driver+17+for+SQL+Server"
+engine = create_engine(conn_string)
 
 @app.post("/upload-excel/")
 async def upload_excel(file: UploadFile):
