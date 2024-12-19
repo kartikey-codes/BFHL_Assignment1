@@ -42,3 +42,10 @@ https://bfhl-assignment1.onrender.com
 4. **Exception Handling**:
    - Proper error messages with HTTP response codes.
    - Handles cases like missing records, invalid data formats, or failed operations.
+
+## Run Locally 
+- After cloning the repo 
+- move into the Backend folder
+- in the terminal run `docker build -t bfhl_assignment1 .`
+- once the image is built run `docker run -e PORT=8000 -p 8000:8000 bfhl_assignment1`
+visit `http://localhost:8000` to access the application.
