@@ -1,16 +1,15 @@
-from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel, Field, ValidationError
-from typing import Optional
+from fastapi import FastAPI, HTTPException
+from pydantic import  ValidationError
 import pandas as pd
 from loguru import logger
 from datetime import datetime
-from openpyxl import load_workbook
 from etl import load_excel_data, update_excel
 from models import Account, Policy, Claim, UpdateAccount, UpdatePolicy, UpdateClaim
 from helper import log_change
 
 app = FastAPI()
 
+# loading data into dataframes
 accounts_df, policies_df, claims_df = load_excel_data()
 
 file_path = 'Processed_Assignment1.xlsx'
@@ -20,6 +19,8 @@ file_path = 'Processed_Assignment1.xlsx'
 def health_check():
     return {"status": "ok", "timestamp": datetime.now().isoformat()}
 
+
+# Get customer information
 @app.get("/customer/{account_id}")
 def customer_information(account_id: str):
     customer = accounts_df[accounts_df['AccountId'] == account_id]
@@ -39,6 +40,9 @@ def customer_information(account_id: str):
     except Exception as e:
         logger.error(f"Error serializing customer data for AccountId {account_id}: {e}")
         raise HTTPException(status_code=500, detail="Error processing customer data.")
+    
+
+# Routes for updating data in any of the three dataframes/sheets
 
 @app.put("/update/account/{account_id}")
 def update_account(account_id: str, updated_data: UpdateAccount):
@@ -52,7 +56,7 @@ def update_account(account_id: str, updated_data: UpdateAccount):
     for column, value in changes.items():
         accounts_df.loc[accounts_df["AccountId"] == account_id, column] = value
 
-    update_excel("Accounts", accounts_df)  
+    update_excel("Accounts", accounts_df)     
     log_change("Update", "Accounts", account_id, changes)
 
     logger.info(f"Logged changes for AccountId {account_id}.")
@@ -70,7 +74,7 @@ def update_policy(han: str, updated_data: UpdatePolicy):
     for column, value in changes.items():
         policies_df.loc[policies_df["HAN"] == han, column] = value
 
-    update_excel("Policies", policies_df)  # Update the Excel sheet
+    update_excel("Policies", policies_df)  
     log_change("Update", "Policies", han, changes)
 
     logger.info(f"Logged changes for HAN {han}.")
@@ -98,6 +102,9 @@ def update_claim(claim_id: str, updated_data: UpdateClaim):
 
     logger.info(f"Logged changes for ClaimId {claim_id}.")
     return {"message": f"Claim {claim_id} updated successfully", "changes_logged": changes}
+
+
+# Routes for adding new data to any of the three dataframes/sheets
 
 @app.post("/add/account")
 def add_account(new_data: Account):
@@ -168,7 +175,9 @@ def add_claim(new_data: Claim):
     except Exception as e:
         logger.error(f"Error adding claim: {e}")
         raise HTTPException(status_code=500, detail=f"Error adding claim: {e}")
+    
 
+# Routes for deleting data from any of the three dataframes/sheets
 
 @app.delete("/delete/account/{account_id}")
 def delete_account(account_id: str):
@@ -212,15 +221,18 @@ def delete_policy(han: str):
 
 @app.delete("/delete/claim/{claim_id}")
 def delete_claim(claim_id: str):
+    #to modify the orignal dataframe
     global claims_df
 
     try:
         claim = claims_df[claims_df["Id"] == claim_id]
         if claim.empty:
             raise HTTPException(status_code=404, detail=f"ClaimId {claim_id} not found.")
-        claims_df = claims_df[claims_df["Id"] != claim_id]
+        #delete the claim
+        claims_df = claims_df[claims_df["Id"] != claim_id]   
         update_excel("Claims", claims_df)
         log_change("Delete", "Claims", claim_id, {"deleted": claim.to_dict(orient="records")})
+        print(log_change)
         logger.info(f"Deleted ClaimId {claim_id}.")
         return {"message": f"Claim {claim_id} deleted successfully."}
     except Exception as e:
